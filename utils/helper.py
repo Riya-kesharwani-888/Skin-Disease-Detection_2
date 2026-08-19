@@ -1,4 +1,16 @@
+# ==========================================================
+# SKIN DISEASE AI
+# HELPER FUNCTIONS
+# ==========================================================
+
 from config import ALLOWED_EXTENSIONS
+from dataset_config import (
+    CLASS_DISPLAY_NAMES,
+    CLASS_DESCRIPTIONS,
+    CLASS_RISK_LEVEL,
+    get_disease_info,
+    get_risk_percentage
+)
 
 
 # ==========================================================
@@ -6,18 +18,12 @@ from config import ALLOWED_EXTENSIONS
 # ==========================================================
 
 def allowed_file(filename):
-    """
-    Check whether uploaded file has a valid image extension.
-    """
-
+    """Check whether uploaded file has a valid image extension."""
     if not filename:
         return False
-
     if "." not in filename:
         return False
-
     extension = filename.rsplit(".", 1)[1].lower()
-
     return extension in ALLOWED_EXTENSIONS
 
 
@@ -26,10 +32,7 @@ def allowed_file(filename):
 # ==========================================================
 
 def format_confidence(confidence):
-    """
-    Convert confidence into percentage with 2 decimal places.
-    """
-
+    """Convert confidence into percentage with 2 decimal places."""
     return round(float(confidence), 2)
 
 
@@ -38,38 +41,20 @@ def format_confidence(confidence):
 # ==========================================================
 
 def get_risk_level(disease):
-
     """
     Estimate disease risk based on predicted disease class.
+    Uses centralized config from dataset_config.py.
     This is NOT a medical diagnosis.
     """
-
-    HIGH_RISK = {
-        "mel",      # Melanoma
-        "bcc",      # Basal Cell Carcinoma
-        "akiec"     # Actinic Keratoses
+    level = CLASS_RISK_LEVEL.get(disease, "unknown")
+    level_display = {
+        "high": "High Risk",
+        "moderate": "Moderate Risk",
+        "low": "Low Risk",
+        "none": "No Risk",
+        "unknown": "Unknown"
     }
-
-    MEDIUM_RISK = {
-        "bkl"
-    }
-
-    LOW_RISK = {
-        "nv",
-        "df",
-        "vasc"
-    }
-
-    if disease in HIGH_RISK:
-        return "High Risk"
-
-    elif disease in MEDIUM_RISK:
-        return "Medium Risk"
-
-    elif disease in LOW_RISK:
-        return "Low Risk"
-
-    return "Unknown"
+    return level_display.get(level, "Unknown")
 
 
 # ==========================================================
@@ -77,13 +62,10 @@ def get_risk_level(disease):
 # ==========================================================
 
 def get_stage(disease):
-
     """
     HAM10000 dataset does not contain stage labels.
-
     Therefore stage prediction is not possible.
     """
-
     return "Not Available"
 
 
@@ -92,23 +74,8 @@ def get_stage(disease):
 # ==========================================================
 
 def get_short_description(disease):
-
-    descriptions = {
-
-        "akiec": "Actinic Keratoses is a precancerous skin lesion caused by long-term sun exposure.",
-
-        "bcc": "Basal Cell Carcinoma is the most common type of skin cancer.",
-
-        "bkl": "Benign Keratosis is a non-cancerous skin lesion.",
-
-        "df": "Dermatofibroma is a harmless fibrous skin growth.",
-
-        "mel": "Melanoma is an aggressive type of skin cancer requiring urgent medical evaluation.",
-
-        "nv": "Melanocytic Nevus is a common mole that is usually harmless.",
-
-        "vasc": "Vascular lesions are abnormalities of blood vessels in the skin."
-
-    }
-
-    return descriptions.get(disease, "No description available.")
+    """Get short description from centralized config."""
+    return CLASS_DESCRIPTIONS.get(
+        disease,
+        "No description available."
+    )

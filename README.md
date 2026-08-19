@@ -1,464 +1,212 @@
-# 🩺 Skin Disease Classification and Stage Identification
+# Skin Disease Classification & Stage Identification
 
-## Final Year B.Tech Project
+## Multi-Stage AI-Powered Skin Condition Analysis System
 
-**Department of Computer Science & Engineering**
+A comprehensive skin condition detection system using EfficientNetB0 deep learning architecture with multi-stage validation pipeline.
 
-**United Institute of Technology, Prayagraj**
-
-**Affiliated to Dr. A.P.J. Abdul Kalam Technical University (AKTU), Lucknow**
-
-**Academic Session: 2025–2026**
+> **⚠️ Medical Disclaimer**: This is an educational and research project. It is NOT a medical diagnosis tool. Always consult a qualified dermatologist for professional evaluation.
 
 ---
 
-# Abstract
+## Features
 
-Skin diseases affect millions of people worldwide, and early diagnosis plays a vital role in preventing severe health complications. However, access to experienced dermatologists is limited in many rural and remote areas, resulting in delayed diagnosis and treatment. This project presents an Artificial Intelligence based web application for **Skin Disease Classification and Stage Identification** using Deep Learning.
+### Multi-Stage Prediction Pipeline
+1. **Image Validation** — Format, dimensions, corruption detection
+2. **Image Quality Check** — Blur, brightness, contrast, resolution assessment
+3. **Human Skin Detection** — Gemini AI-powered validation (rejects animals, plants, objects)
+4. **Disease Classification** — EfficientNetB0 TensorFlow model
+5. **Confidence Validation** — Uncertainty/rejection thresholding
+6. **Result Categorization** — Healthy / Disease / Non-Disease Condition / Invalid / Uncertain
 
-The proposed system utilizes the **EfficientNetB0** deep learning architecture trained on the **HAM10000** dataset to classify different types of skin diseases. Users can upload a skin image through a Flask-based web application, and the system predicts the disease along with confidence score, risk level, symptoms, disease description, and precautions.
+### Supported Classes (9)
+| Class ID | Display Name | Category | Risk Level |
+|---|---|---|---|
+| `akiec` | Actinic Keratoses | Malignant Neoplasm | Moderate |
+| `bcc` | Basal Cell Carcinoma | Malignant Neoplasm | High |
+| `bkl` | Benign Keratosis | Benign Neoplasm | Low |
+| `df` | Dermatofibroma | Benign Neoplasm | Low |
+| `healthy` | Healthy Skin | Healthy | None |
+| `mel` | Melanoma | Malignant Neoplasm | High |
+| `nv` | Melanocytic Nevus | Benign Neoplasm | Low |
+| `vasc` | Vascular Lesion | Vascular | Low |
+| `vitiligo` | Vitiligo | Pigmentation Disorder | Low |
 
-The application is designed to be simple, responsive, and user-friendly, making it suitable for educational purposes and preliminary skin disease screening.
-
----
-
-# Project Objectives
-
-The primary objectives of this project are:
-
-- To develop an AI-based system for skin disease classification.
-- To identify the severity (risk level) of the detected disease.
-- To provide confidence score for each prediction.
-- To display disease description, symptoms, and precautions.
-- To develop a simple and user-friendly web application.
-- To assist users in early skin disease screening.
-- To improve accessibility of preliminary diagnosis using Artificial Intelligence.
-
----
-
-# Problem Statement
-
-Skin diseases are among the most common health problems worldwide. Due to the shortage of dermatologists, especially in rural regions, many patients are unable to receive timely diagnosis and treatment.
-
-Traditional diagnosis depends completely on expert medical professionals and manual examination, which is time-consuming and expensive. Therefore, an AI-based automated system can assist users by providing preliminary disease prediction from skin images.
-
-This project addresses this problem by developing a Deep Learning-based web application capable of classifying skin diseases and displaying useful medical information.
-
----
-
-# Project Features
-
-- AI-Based Skin Disease Classification
-- Stage / Risk Level Identification
-- Confidence Score
-- Upload Skin Image
-- Image Preview
-- Disease Description
-- Symptoms
-- Precautions
-- Top 3 Predictions
-- Secure Image Upload
-- Fast Prediction
-- Responsive User Interface
-- Error Handling
-- Flask-Based Web Application
+### Result Categories
+- ✅ **Healthy Skin** — No disease detected
+- ⚠️ **Disease Detected** — Condition identified with confidence score
+- 🔶 **Non-Disease Condition** — Injury or non-disease skin abnormality
+- ❌ **Invalid Input** — Not human skin (animal, plant, object, etc.)
+- 📷 **Low Quality** — Image too blurry, dark, or low resolution
+- ❓ **Uncertain** — Model cannot classify reliably
 
 ---
 
-# Technologies Used
+## Architecture
 
-## Frontend
+### Model
+- **Base**: EfficientNetB0 (ImageNet pretrained)
+- **Input**: 224×224×3 RGB
+- **Classification Head**: GAP → BN → Dense(256) → Dropout(0.45) → Dense(128) → Dropout(0.30) → Dense(9, softmax)
+- **Training**: 2-stage transfer learning (head training + fine-tuning top 30%)
 
-- HTML5
-- CSS3
-- JavaScript
-
-## Backend
-
-- Python
-- Flask
-
-## Artificial Intelligence / Machine Learning
-
-- TensorFlow
-- Keras
-- EfficientNetB0
-- OpenCV
-- NumPy
-- Pillow
+### Tech Stack
+- **Backend**: Flask (Python)
+- **ML Framework**: TensorFlow / Keras
+- **Skin Validation**: Google Gemini API
+- **Database**: SQLite (authentication)
+- **Frontend**: Custom HTML/CSS/JS with Chart.js
+- **Reports**: ReportLab PDF generation
 
 ---
 
-# Software Requirements
-
-- Python 3.10+
-- Visual Studio Code
-- TensorFlow
-- Flask
-- OpenCV
-- NumPy
-- Pillow
-- Git
-- GitHub
-
----
-
-# Hardware Requirements
-
-Minimum Requirements
-
-- Intel Core i3 Processor
-- 8 GB RAM
-- 10 GB Free Storage
-- Windows 10 / Windows 11
-
-Recommended
-
-- Intel Core i5 / Ryzen 5
-- 16 GB RAM
-- SSD Storage
-- NVIDIA GPU (Optional)
-
----
-
-# Dataset Information
-
-Dataset Name
-
-**HAM10000 (Human Against Machine with 10000 Images)**
-
-Image Size
-
-224 × 224 Pixels
-
-Total Classes
-
-7 Skin Disease Classes
-
-Disease Categories
-
-1. Actinic Keratoses (AKIEC)
-2. Basal Cell Carcinoma (BCC)
-3. Benign Keratosis (BKL)
-4. Dermatofibroma (DF)
-5. Melanoma (MEL)
-6. Melanocytic Nevus (NV)
-7. Vascular Lesion (VASC)
-
----
-
-# Model Information
-
-Model Name
-
-**EfficientNetB0**
-
-Framework
-
-TensorFlow / Keras
-
-Input Size
-
-224 × 224 × 3
-
-Optimizer
-
-Adam
-
-Loss Function
-
-Categorical Crossentropy
-
-Activation Function
-
-Softmax
-
-Transfer Learning
-
-Yes
-
-Output Classes
-
-7
-
----
-
-# Functional Requirements
-
-- Image Upload
-- Image Preprocessing
-- Disease Classification
-- Risk Level Identification
-- Confidence Score Display
-- Disease Information Display
-- Prediction Result Display
-
----
-
-# Non Functional Requirements
-
-- High Accuracy
-- Fast Response
-- User Friendly Interface
-- Reliability
-- Scalability
-- Secure Image Handling
-- Easy Accessibility
----
-
-# System Architecture
+## Project Structure
 
 ```
-                User
-                  │
-                  ▼
-        Upload Skin Image
-                  │
-                  ▼
-       Image Preprocessing
-                  │
-                  ▼
-      EfficientNetB0 Deep Learning Model
-                  │
-                  ▼
-      Skin Disease Classification
-                  │
-                  ▼
-      Risk Level Identification
-                  │
-                  ▼
-      Result Generation
-                  │
-                  ▼
-Disease Name + Confidence Score
-Symptoms + Precautions + Top Predictions
-```
-
----
-
-# Project Workflow
-
-The complete workflow of the system is illustrated below:
-
-1. User uploads a skin disease image.
-2. The uploaded image is validated.
-3. Image preprocessing is performed.
-4. The image is resized to **224 × 224** pixels.
-5. The trained EfficientNetB0 model processes the image.
-6. The model predicts the disease class.
-7. Confidence score is calculated.
-8. Risk level is identified.
-9. Disease information, symptoms and precautions are displayed.
-10. Prediction result is shown to the user.
-
----
-
-# Project Structure
-
-```
-SkinDiseaseClassification/
-│
-├── app.py
-├── config.py
-├── train.py
-├── model.py
-├── predict.py
-├── prepare_dataset.py
-├── requirements.txt
-├── README.md
-│
+SkinDiseaseDiagnosis/
+├── app.py                  # Flask backend (routes, API)
+├── pipeline.py             # Multi-stage prediction pipeline
+├── train.py                # Model training script
+├── model.py                # EfficientNetB0 model builder
+├── config.py               # Application configuration
+├── dataset_config.py       # Class taxonomy & disease info
+├── prepare_dataset.py      # Dataset preparation & splitting
+├── predict.py              # Standalone prediction module
+├── requirements.txt        # Python dependencies
 ├── models/
-│      skin_model.keras
-│
-├── dataset/
-│      train/
-│      test/
-│
-├── static/
-│      style.css
-│      uploads/
-│      js/
-│          script.js
-│
+│   ├── skin_model.keras    # Trained model weights
+│   └── class_names.json    # Class label mapping
+├── dataset/                # Training/validation/test data
+│   ├── train/              #   (9 class subdirectories)
+│   ├── val/
+│   └── test/
+├── utils/
+│   ├── gemini.py           # Gemini API integration
+│   ├── helper.py           # Helper functions
+│   ├── image_validator.py  # Image quality assessment
+│   └── preprocess.py       # Image preprocessing
 ├── templates/
-│      index.html
-│      result.html
-│      404.html
-│      500.html
-│
-└── utils/
-       helper.py
-       preprocess.py
+│   ├── index.html          # Main page (upload/capture)
+│   ├── result.html         # Analysis results dashboard
+│   ├── login.html          # Authentication page
+│   ├── 404.html            # Error page
+│   └── 500.html            # Error page
+├── static/
+│   ├── css/style.css       # Styles
+│   └── js/script.js        # Frontend logic + camera
+├── tests/
+│   ├── test_pipeline.py    # Pipeline tests
+│   └── test_api.py         # API endpoint tests
+└── reports/                # Generated training reports
 ```
 
 ---
 
-# Installation Guide
+## Setup
 
-## Clone Repository
-
-```bash
-git clone <repository-link>
-```
-
-## Open Project Folder
-
-```bash
-cd SkinDiseaseClassification
-```
-
-## Create Virtual Environment
-
-```bash
-python -m venv venv
-```
-
-## Activate Virtual Environment (Windows)
-
-```bash
-venv\Scripts\activate
-```
-
-## Install Required Packages
-
+### 1. Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-## Run Application
+### 2. Configure Environment
+Create a `.env` file:
+```
+GEMINI_API_KEY=your_gemini_api_key_here
+```
 
+### 3. Prepare Dataset
+```bash
+python prepare_dataset.py
+```
+This creates a properly split dataset with train/val/test directories.
+
+### 4. Train Model
+```bash
+python train.py
+```
+Generates model weights, confusion matrix, training curves, and metrics report.
+
+### 5. Run Application
 ```bash
 python app.py
 ```
+Access at `http://localhost:5000`
 
-## Open Browser
+Default login: `admin` / `admin123`
 
+---
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/` | Home page (requires login) |
+| `POST` | `/login` | User authentication |
+| `GET` | `/logout` | Clear session |
+| `POST` | `/predict` | Upload image for analysis |
+| `POST` | `/chat` | AI medical assistant chat |
+| `GET` | `/health` | Server health check |
+| `POST` | `/download_report` | Generate PDF report |
+
+### Prediction Response Structure
+```json
+{
+  "status": "disease",
+  "condition": "mel",
+  "condition_display": "Melanoma",
+  "confidence": 93.5,
+  "risk_level": "high",
+  "risk_percentage": 85.0,
+  "category": "Malignant Neoplasm",
+  "description": "...",
+  "symptoms": "...",
+  "precautions": "...",
+  "top_predictions": [...],
+  "message": "...",
+  "medical_disclaimer": "..."
+}
 ```
-http://127.0.0.1:5000
-```
 
 ---
 
-# Expected Output
+## Training Details
 
-The application predicts:
+### Data Augmentation
+- Rotation: ±25°
+- Width/Height shift: 12%
+- Shear: 10%
+- Zoom: 20%
+- Horizontal flip: Yes
+- Brightness: [0.85, 1.15]
 
-- Disease Name
-- Confidence Score
-- Risk Level
-- Disease Description
-- Symptoms
-- Precautions
-- Top 3 Predictions
+### Training Strategy
+- **Stage 1**: Head training (10 epochs, LR=3e-4)
+- **Stage 2**: Fine-tuning top 30% (20 epochs, LR=1e-5)
+- **Optimizer**: Adam
+- **Loss**: Categorical Crossentropy
+- **Class Weights**: Computed balanced weights (sklearn)
 
----
-
-# Advantages
-
-- Early Skin Disease Detection
-- AI-Based Prediction
-- User Friendly Interface
-- Fast Response Time
-- Low Cost Solution
-- Easy Accessibility
-- Supports Preliminary Diagnosis
-- Can be Extended for Mobile Applications
+### Evaluation Metrics
+- Accuracy, Precision, Recall, F1-score (per-class)
+- Confusion matrix
+- Training/validation curves
 
 ---
 
-# Future Scope
+## Dataset
 
-- Increase Number of Disease Classes
-- Improve Model Accuracy
-- Real Stage Prediction Model
-- Grad-CAM Heatmap Visualization
-- PDF Report Generation
-- Cloud Deployment
-- Mobile Application Development
-- Doctor Consultation Module
-- Patient History Management
-- Multi-language Support
+### Source
+- **HAM10000**: 10,015 dermatoscopic images (7 disease classes)
+- **Healthy Skin**: Custom healthy skin image collection
+- **Vitiligo**: Roboflow dermatological images dataset
 
----
-
-# Team Members
-
-- **Riya Kesharwani**
-- **Deepak Kumar**
-- **Rishi Pandey**
-- **Shivam Keshri**
+### Split Strategy
+- **Train**: 70% | **Validation**: 15% | **Test**: 15%
+- Patient-level splitting using `lesion_id` to prevent data leakage
+- Stratified to maintain class distribution
 
 ---
 
-# Project Supervisor
+## Author
 
-**Dr. Ankita Srivastava**
-
-Assistant Professor
-
-Department of Computer Science & Engineering
-
-United Institute of Technology
-
-Prayagraj, Uttar Pradesh
-
----
-
-# References
-
-1. HAM10000 Skin Lesion Dataset
-2. TensorFlow Documentation
-3. Keras Documentation
-4. Flask Documentation
-5. EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks
-6. OpenCV Documentation
-
----
-
-# Acknowledgement
-
-We sincerely express our gratitude to **Dr. Ankita Srivastava** for her valuable guidance, continuous encouragement and support throughout the development of this project.
-
-We also thank the **Department of Computer Science & Engineering, United Institute of Technology, Prayagraj**, for providing the necessary facilities and resources to successfully complete this project.
-
----
-
-# Disclaimer
-
-This project has been developed for **educational and research purposes only**.
-
-The prediction generated by the AI model should **not** be considered a professional medical diagnosis. Users are strongly advised to consult a qualified dermatologist for proper examination and treatment.
-
----
-
-# License
-
-This project is intended solely for academic use as a Final Year B.Tech Project.
-
----
-
-# Developed By
-
-**Riya Kesharwani**
-
-**Deepak Kumar**
-
-**Rishi Pandey**
-
-**Shivam Keshri**
-
-Department of Computer Science & Engineering
-
-United Institute of Technology
-
-Prayagraj
-
-Academic Session: **2025–2026**
-
----
-
-# Thank You
-
-**Skin Disease Classification and Stage Identification**
-
-**Artificial Intelligence for Better Healthcare**
+**Riya Kesharwani** — Final Year B.Tech Project

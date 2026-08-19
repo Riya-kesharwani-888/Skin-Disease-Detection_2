@@ -1,12 +1,11 @@
 import os
-
-# ==========================================================
-# BASE DIRECTORY
-# ==========================================================
+from dotenv import load_dotenv
 
 BASE_DIR = os.path.dirname(
     os.path.abspath(__file__)
 )
+
+load_dotenv(os.path.join(BASE_DIR, ".env"))
 
 
 # ==========================================================
@@ -65,7 +64,7 @@ os.makedirs(
 
 
 # ==========================================================
-# MODEL CONFIGURATION
+# MODEL
 # ==========================================================
 
 MODEL_NAME = "skin_model.keras"
@@ -77,7 +76,7 @@ MODEL_PATH = os.path.join(
 
 
 # ==========================================================
-# IMAGE CONFIGURATION
+# IMAGE
 # ==========================================================
 
 IMAGE_SIZE = (
@@ -89,7 +88,7 @@ IMAGE_CHANNELS = 3
 
 
 # ==========================================================
-# UPLOAD CONFIGURATION
+# UPLOAD
 # ==========================================================
 
 ALLOWED_EXTENSIONS = {
@@ -105,7 +104,7 @@ MAX_CONTENT_LENGTH = (
 
 
 # ==========================================================
-# PREDICTION CONFIGURATION
+# PREDICTION
 # ==========================================================
 
 TOP_PREDICTIONS = 3
@@ -113,17 +112,97 @@ TOP_PREDICTIONS = 3
 CONFIDENCE_THRESHOLD = 0.50
 
 
+# If confidence is below this value,
+# the result is treated as uncertain.
+
+NO_DISEASE_CONFIDENCE = 0.50
+
+
 # ==========================================================
-# FLASK CONFIGURATION
+# GEMINI FALLBACK MODELS
+# ==========================================================
+GEMINI_FALLBACK_MODELS = [
+    "gemini-2.5-flash",
+    "gemini-2.0-flash",
+    "gemini-1.5-flash",
+]
+
+
+# ==========================================================
+# HEALTHY CLASS THRESHOLD
+# ==========================================================
+#
+# IMPORTANT:
+#
+# This value is used by app.py when the model
+# predicts the Healthy class.
+#
+# app.py compares this with confidence expressed
+# as a percentage, for example:
+#
+#     87.50
+#
+# Therefore the threshold is:
+#
+#     85.0
+#
 # ==========================================================
 
-SECRET_KEY = "SkinAI2026"
+HEALTHY_THRESHOLD = 85.0
+
+
+# ==========================================================
+# IMAGE QUALITY GATE
+# ==========================================================
+# If the image quality score from the local validator
+# falls below this threshold, prediction is blocked.
+QUALITY_GATE_THRESHOLD = 40.0
+
+
+# ==========================================================
+# FLASK
+# ==========================================================
+
+SECRET_KEY = os.getenv(
+    "SKINAI_SECRET_KEY",
+    "SkinAI2026_FinalYear_Project"
+)
 
 DEBUG = True
 
 
 # ==========================================================
-# APPLICATION INFORMATION
+# LOGIN
+# ==========================================================
+
+LOGIN_USERNAME = os.getenv(
+    "SKINAI_USERNAME",
+    "admin"
+)
+
+LOGIN_PASSWORD = os.getenv(
+    "SKINAI_PASSWORD",
+    "SkinAI@2026"
+)
+
+
+# ==========================================================
+# GEMINI
+# ==========================================================
+
+GEMINI_API_KEY = os.getenv(
+    "GEMINI_API_KEY",
+    ""
+) or os.getenv("GOOGLE_API_KEY", "")
+
+GEMINI_MODEL = os.getenv(
+    "GEMINI_MODEL",
+    "gemini-3.6-flash"
+)
+
+
+# ==========================================================
+# APPLICATION
 # ==========================================================
 
 APP_NAME = (
@@ -131,7 +210,7 @@ APP_NAME = (
     "& Stage Identification"
 )
 
-VERSION = "2.0"
+VERSION = "3.0"
 
 AUTHOR = "Riya Kesharwani"
 

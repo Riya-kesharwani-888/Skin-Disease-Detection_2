@@ -1,7 +1,21 @@
 # ============================================================
 # SKIN DISEASE AI
 # IMAGE PREPROCESSING
-# Compatible with EfficientNetB0
+# ============================================================
+#
+# Compatible with:
+# EfficientNetB0
+#
+# IMPORTANT:
+#
+# Training pipeline:
+#     ImageDataGenerator
+#     target_size = (224, 224)
+#     No manual /255 normalization
+#
+# Therefore prediction pipeline also keeps
+# pixel values in the 0-255 range.
+#
 # ============================================================
 
 from PIL import Image
@@ -16,19 +30,48 @@ from config import IMAGE_SIZE
 
 def preprocess_image(image_path):
     """
-    Prepare an uploaded image for EfficientNetB0.
+    Prepare an uploaded image for the TensorFlow model.
 
-    Training pipeline:
-        ImageDataGenerator
-        target_size = (224, 224)
-        No manual /255 normalization
+    Steps:
+        1. Open image
+        2. Convert to RGB
+        3. Resize to IMAGE_SIZE
+        4. Convert to float32 NumPy array
+        5. Validate shape
+        6. Add batch dimension
 
     Output:
         NumPy array with shape:
-        (1, 224, 224, 3)
+
+        (1, IMAGE_SIZE[0], IMAGE_SIZE[1], 3)
+
+    IMPORTANT:
+        No manual /255 normalization is performed here.
+
+        This should match the training pipeline.
     """
 
     try:
+
+        # ----------------------------------------------------
+        # CHECK IMAGE PATH
+        # ----------------------------------------------------
+
+        if not image_path:
+            raise ValueError(
+                "Image path is empty."
+            )
+
+        # ----------------------------------------------------
+        # CHECK FILE EXISTS
+        # ----------------------------------------------------
+
+        import os
+
+        if not os.path.exists(image_path):
+            raise FileNotFoundError(
+                f"Image file not found: {image_path}"
+            )
 
         # ----------------------------------------------------
         # OPEN IMAGE
@@ -38,6 +81,11 @@ def preprocess_image(image_path):
             image_path
         )
 
+        # ----------------------------------------------------
+        # FORCE IMAGE LOAD
+        # ----------------------------------------------------
+
+        image.load()
 
         # ----------------------------------------------------
         # CONVERT TO RGB
@@ -46,7 +94,6 @@ def preprocess_image(image_path):
         image = image.convert(
             "RGB"
         )
-
 
         # ----------------------------------------------------
         # RESIZE
@@ -57,7 +104,6 @@ def preprocess_image(image_path):
             Image.Resampling.LANCZOS
         )
 
-
         # ----------------------------------------------------
         # CONVERT TO NUMPY
         # ----------------------------------------------------
@@ -67,9 +113,8 @@ def preprocess_image(image_path):
             dtype=np.float32
         )
 
-
         # ----------------------------------------------------
-        # SAFETY CHECK
+        # BASIC DIMENSION CHECK
         # ----------------------------------------------------
 
         if image_array.ndim != 3:
@@ -78,25 +123,39 @@ def preprocess_image(image_path):
                 "Image must have 3 dimensions."
             )
 
+        # ----------------------------------------------------
+        # RGB CHANNEL CHECK
+        # ----------------------------------------------------
 
         if image_array.shape[2] != 3:
 
             raise ValueError(
-                "Image must have 3 RGB channels."
+                "Image must have exactly "
+                "3 RGB channels."
             )
 
-
         # ----------------------------------------------------
-        # IMPORTANT
-        # ----------------------------------------------------
-        # DO NOT USE:
-        #
-        # image_array /= 255.0
-        #
-        # EfficientNetB0's preprocessing is handled
-        # by the TensorFlow EfficientNet implementation.
+        # CHECK FOR INVALID NUMBERS
         # ----------------------------------------------------
 
+        if not np.isfinite(
+            image_array
+        ).all():
+
+            raise ValueError(
+                "Image contains invalid pixel values."
+            )
+
+        # ----------------------------------------------------
+        # IMPORTANT:
+        #
+        # DO NOT DO:
+        #
+        # image_array = image_array / 255.0
+        #
+        # because the current project preprocessing
+        # is designed to match the training pipeline.
+        # ----------------------------------------------------
 
         # ----------------------------------------------------
         # ADD BATCH DIMENSION
@@ -107,40 +166,51 @@ def preprocess_image(image_path):
             axis=0
         )
 
+        # ----------------------------------------------------
+        # FINAL EXPECTED SHAPE
+        # ----------------------------------------------------
+
+        expected_shape = (
+
+            1,
+
+            IMAGE_SIZE[0],
+
+            IMAGE_SIZE[1],
+
+            3
+
+        )
 
         # ----------------------------------------------------
         # FINAL SHAPE CHECK
         # ----------------------------------------------------
 
-        expected_shape = (
-            1,
-            IMAGE_SIZE[0],
-            IMAGE_SIZE[1],
-            3
-        )
-
-
         if image_array.shape != expected_shape:
 
             raise ValueError(
 
-                f"Invalid processed image shape: "
+                "Invalid processed image shape: "
+
                 f"{image_array.shape}. "
 
-                f"Expected: "
-                f"{expected_shape}"
+                f"Expected: {expected_shape}"
 
             )
 
+        # ----------------------------------------------------
+        # RETURN
+        # ----------------------------------------------------
 
         return image_array
-
 
     except Exception as e:
 
         raise RuntimeError(
 
-            f"Image preprocessing failed: {str(e)}"
+            "Image preprocessing failed: "
+
+            + str(e)
 
         )
 
@@ -154,8 +224,14 @@ def preprocess_array(image):
     Prepare an already-loaded PIL image.
 
     Output:
+
         NumPy array with shape:
-        (1, 224, 224, 3)
+
+        (1, IMAGE_SIZE[0], IMAGE_SIZE[1], 3)
+
+    IMPORTANT:
+
+        No manual /255 normalization.
     """
 
     try:
@@ -170,7 +246,6 @@ def preprocess_array(image):
                 "No image was provided."
             )
 
-
         # ----------------------------------------------------
         # CONVERT TO RGB
         # ----------------------------------------------------
@@ -178,7 +253,6 @@ def preprocess_array(image):
         image = image.convert(
             "RGB"
         )
-
 
         # ----------------------------------------------------
         # RESIZE
@@ -189,7 +263,6 @@ def preprocess_array(image):
             Image.Resampling.LANCZOS
         )
 
-
         # ----------------------------------------------------
         # NUMPY ARRAY
         # ----------------------------------------------------
@@ -199,9 +272,8 @@ def preprocess_array(image):
             dtype=np.float32
         )
 
-
         # ----------------------------------------------------
-        # CHANNEL CHECK
+        # DIMENSION CHECK
         # ----------------------------------------------------
 
         if image_array.ndim != 3:
@@ -210,16 +282,37 @@ def preprocess_array(image):
                 "Image must have 3 dimensions."
             )
 
+        # ----------------------------------------------------
+        # RGB CHECK
+        # ----------------------------------------------------
 
         if image_array.shape[2] != 3:
 
             raise ValueError(
-                "Image must have 3 RGB channels."
+                "Image must have exactly "
+                "3 RGB channels."
             )
 
+        # ----------------------------------------------------
+        # INVALID VALUE CHECK
+        # ----------------------------------------------------
+
+        if not np.isfinite(
+            image_array
+        ).all():
+
+            raise ValueError(
+                "Image contains invalid pixel values."
+            )
 
         # ----------------------------------------------------
         # NO /255 NORMALIZATION
+        # ----------------------------------------------------
+
+        # Keep 0-255 range.
+
+        # ----------------------------------------------------
+        # ADD BATCH DIMENSION
         # ----------------------------------------------------
 
         image_array = np.expand_dims(
@@ -227,53 +320,70 @@ def preprocess_array(image):
             axis=0
         )
 
+        # ----------------------------------------------------
+        # EXPECTED SHAPE
+        # ----------------------------------------------------
+
+        expected_shape = (
+
+            1,
+
+            IMAGE_SIZE[0],
+
+            IMAGE_SIZE[1],
+
+            3
+
+        )
 
         # ----------------------------------------------------
         # FINAL SHAPE CHECK
         # ----------------------------------------------------
 
-        expected_shape = (
-            1,
-            IMAGE_SIZE[0],
-            IMAGE_SIZE[1],
-            3
-        )
-
-
         if image_array.shape != expected_shape:
 
             raise ValueError(
 
-                f"Invalid processed image shape: "
+                "Invalid image shape: "
+
                 f"{image_array.shape}. "
 
-                f"Expected: "
-                f"{expected_shape}"
+                f"Expected: {expected_shape}"
 
             )
 
-
         return image_array
-
 
     except Exception as e:
 
         raise RuntimeError(
 
-            f"Image array preprocessing failed: "
-            f"{str(e)}"
+            "Image array preprocessing failed: "
+
+            + str(e)
 
         )
 
 
 # ============================================================
-# OPTIONAL HELPER
+# VALIDATE PROCESSED IMAGE ARRAY
 # ============================================================
 
 def validate_image_array(image_array):
     """
-    Validate a processed image before prediction.
+    Validate a processed image before TensorFlow prediction.
+
+    Expected:
+
+        NumPy array
+
+        Shape:
+        (1, IMAGE_SIZE[0], IMAGE_SIZE[1], 3)
     """
+
+    # --------------------------------------------------------
+    # TYPE CHECK
+    # --------------------------------------------------------
 
     if not isinstance(
         image_array,
@@ -284,36 +394,127 @@ def validate_image_array(image_array):
             "Image must be a NumPy array."
         )
 
+    # --------------------------------------------------------
+    # DIMENSION CHECK
+    # --------------------------------------------------------
 
     if image_array.ndim != 4:
 
         raise ValueError(
 
-            f"Expected 4D input, "
+            "Expected 4D input, "
+
             f"got {image_array.ndim}D."
 
         )
 
+    # --------------------------------------------------------
+    # BATCH SIZE CHECK
+    # --------------------------------------------------------
 
     if image_array.shape[0] != 1:
 
         raise ValueError(
-            "Batch size must be 1."
+            "Batch size must be exactly 1."
         )
 
+    # --------------------------------------------------------
+    # IMAGE SHAPE CHECK
+    # --------------------------------------------------------
 
-    if image_array.shape[1:] != (
+    expected_shape = (
+
+        1,
+
         IMAGE_SIZE[0],
+
         IMAGE_SIZE[1],
+
         3
+
+    )
+
+    if image_array.shape != expected_shape:
+
+        raise ValueError(
+
+            "Invalid image shape: "
+
+            f"{image_array.shape}. "
+
+            f"Expected: {expected_shape}"
+
+        )
+
+    # --------------------------------------------------------
+    # NUMERIC VALUE CHECK
+    # --------------------------------------------------------
+
+    if not np.isfinite(
+        image_array
+    ).all():
+
+        raise ValueError(
+            "Image array contains invalid values."
+        )
+
+    # --------------------------------------------------------
+    # PIXEL RANGE CHECK
+    # --------------------------------------------------------
+
+    if (
+        np.min(image_array) < 0
+        or
+        np.max(image_array) > 255
     ):
 
         raise ValueError(
 
-            f"Invalid image shape: "
-            f"{image_array.shape}"
+            "Image pixel values are outside "
+            "the expected 0-255 range."
 
         )
 
-
     return True
+
+
+# ============================================================
+# DEBUG / TEST
+# ============================================================
+
+if __name__ == "__main__":
+
+    print(
+        "=============================================="
+    )
+
+    print(
+        "SKIN AI IMAGE PREPROCESSOR"
+    )
+
+    print(
+        "=============================================="
+    )
+
+    print(
+        "IMAGE_SIZE:",
+        IMAGE_SIZE
+    )
+
+    print(
+        "Expected input shape:",
+        (
+            1,
+            IMAGE_SIZE[0],
+            IMAGE_SIZE[1],
+            3
+        )
+    )
+
+    print(
+        "Manual /255 normalization: DISABLED"
+    )
+
+    print(
+        "Preprocessing module loaded successfully."
+    )
