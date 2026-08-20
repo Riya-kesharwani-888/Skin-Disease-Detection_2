@@ -34,14 +34,13 @@ static/reports/
 
 # ============================================================
 # MODEL FILES
-# Large trained model files should NOT be uploaded to GitHub
 # ============================================================
 
-*.keras
-*.h5
 *.pt
 *.pth
 *.ckpt
+models/skin_model_7class_backup.keras
+!models/skin_model.keras
 
 
 # ============================================================
@@ -83,13 +82,7 @@ __pycache__/
 
 dataset/
 uploads/
-
-*.h5
-*.keras
-*.ckpt
-*.pt
-*.pth
-
+# ============================================================
 static/uploads/
 static/reports/
 healthy_dataset/
