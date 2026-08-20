@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: skin-disease-diagnosis
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: gunicorn app:app --workers 1 --threads 4 --timeout 120 --bind 0.0.0.0:$PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: TF_ENABLE_ONEDNN_OPTS
+        value: 0

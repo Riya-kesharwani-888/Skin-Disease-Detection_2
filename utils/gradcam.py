@@ -8,7 +8,10 @@
 # ============================================================
 
 import os
-import cv2
+try:
+    import cv2
+except ImportError:
+    cv2 = None
 import numpy as np
 import tensorflow as tf
 from PIL import Image
@@ -45,6 +48,9 @@ def generate_gradcam(model, image_array, class_index=None, overlay_alpha=0.4):
     Returns:
         heatmap_overlay: RGB uint8 NumPy array of the image with heatmap overlay (224, 224, 3)
     """
+    if cv2 is None:
+        return np.uint8(np.squeeze(image_array))
+
     try:
         # Determine last conv layer
         last_conv_layer_name = find_last_conv_layer(model)
