@@ -3,11 +3,23 @@
 # FINAL YEAR PROJECT
 # ============================================================
 
+# --- Environment & Memory Optimizations ---
+import os
+os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["TF_NUM_INTRAOP_THREADS"] = "1"
+os.environ["TF_NUM_INTEROP_THREADS"] = "1"
+
 # --- Imports ---
 from flask import Flask, render_template, request, jsonify, send_file, url_for, redirect, session
 import tensorflow as tf
+try:
+    tf.config.threading.set_inter_op_parallelism_threads(1)
+    tf.config.threading.set_intra_op_parallelism_threads(1)
+except Exception:
+    pass
 import numpy as np
-import os, uuid, json, sqlite3, time
+import uuid, json, sqlite3, time
 from PIL import Image
 from datetime import datetime
 from functools import wraps
